@@ -1,31 +1,33 @@
-# ParkImpact AI
+# Parking Impact Intelligence
 
-ParkImpact AI is an AI-driven parking intelligence platform that identifies illegal parking hotspots, estimates congestion impact using proxy metrics, predicts future parking violations, generates dynamic fine recommendations, and provides enforcement planning.
+A polished, production-ready Streamlit application built for discovering actionable parking enforcement insights and micro-hotspots.
 
-## Features
+## Project Overview
 
-- **Hotspot Detection Module**: Uses DBSCAN clustering to identify violation hotspots.
-- **Congestion Impact Engine**: Calculates a Parking Impact Score (PIS) for each violation based on vehicle type, violation type, road type, and peak hours.
-- **Dynamic Fine Recommendation**: Computes fines ranging from ₹500 to ₹5000 based on the PIS.
-- **Prediction Model**: Forecasts future hotspot risks and violation counts using Machine Learning (LightGBM/XGBoost/RandomForest).
-- **Enforcement Planner**: Calculates Priority Scores and provides an enforcement deployment plan.
-- **Streamlit Dashboard**: A comprehensive multipage dashboard for analytics and visualizations.
+This app transforms raw parking violation data into a targeted enforcement planner. It prioritizes data quality and transparent methodology, strictly using **only** the provided dataset without relying on external geocoding, APIs, or mapping engines.
 
-## Setup
+### Key Innovations
 
-1. Install dependencies:
+1. **Micro-Hotspot Discovery (DBSCAN)**: Automatically clusters coordinate points for records with missing or "No Junction" labels, unearthing previously hidden parking problem zones.
+2. **Impact-Aware Ranking**: Replaces simple counts with a transparent Impact Score that weights vehicle severity (e.g., Trucks > Cars > Scooters), recurrence across multiple days, and peak hour concentration.
+3. **Data Quality Awareness**: Actively monitors for device coverage anomalies (e.g., sudden drops in February) and allows users to exclude them to prevent skewed behavioral analysis.
+4. **Timezone Accuracy**: Corrects raw UTC timestamps to IST, ensuring critical insights like "Peak Enforcement Windows" are off by 0 hours instead of 5.5 hours.
+
+## How to Run
+
+1. Ensure Python is installed.
+2. Place the dataset file (`jan to may police violation_anonymized791b166.csv`) in the same directory as `app.py`.
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-
-2. Run the dashboard:
+4. Run the Streamlit app:
    ```bash
-   streamlit run dashboard.py
+   streamlit run app.py
    ```
 
-## Files
+## Caveats & Constraints
 
-- `hotspot.py`: Contains core logic for preprocessing, clustering, and PIS calculations.
-- `train.py`: Script to train ML models for predicting parking violations.
-- `predict.py`: Script to load models and make predictions for the enforcement planner.
-- `dashboard.py`: Multipage Streamlit application.
+- **Dataset Only**: The app adheres to the strict constraint of using *only* the provided CSV. Maps are plotted using existing lat/lon columns.
+- **Enforcement Bias**: Peak violation windows indicate when enforcement patrols were active or devices were on, not necessarily when parking violations were highest.
+- **Impact vs Congestion**: The Impact Score is a relative prioritization proxy and does not directly measure real-world traffic congestion.

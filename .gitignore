@@ -1,3 +1,4 @@
+*.csv
 __pycache__/
-jan to may police violation_anonymized791b166.csv
-processed_data.csv
+.streamlit/
+.env
