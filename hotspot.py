@@ -18,15 +18,23 @@ def load_and_clean_data(file_path):
     df.dropna(subset=['latitude', 'longitude'], inplace=True)
     df.fillna({'junction_name': 'Unknown', 'police_station': 'Unknown', 'location': 'Unknown'}, inplace=True)
     
-    # Parse dates
+    # Parse dates and convert UTC to IST
     df['created_datetime'] = pd.to_datetime(df['created_datetime'], errors='coerce')
     df.dropna(subset=['created_datetime'], inplace=True)
+    
+    if df['created_datetime'].dt.tz is not None:
+        df['created_datetime'] = df['created_datetime'].dt.tz_convert('Asia/Kolkata')
+    else:
+        df['created_datetime'] = df['created_datetime'].dt.tz_localize('UTC').dt.tz_convert('Asia/Kolkata')
     
     # Extract features
     df['hour'] = df['created_datetime'].dt.hour
     df['day_of_week'] = df['created_datetime'].dt.dayofweek
     df['month'] = df['created_datetime'].dt.month
     df['weekend'] = df['day_of_week'].isin([5, 6]).astype(int)
+    
+    # Flag February anomaly (for dashboard exclusion)
+    df['is_feb_anomaly'] = (df['month'] == 2)
     
     # Parse violation_type (it is stored as string lists)
     def parse_violation(v):
@@ -38,8 +46,6 @@ def load_and_clean_data(file_path):
             return [v]
             
     df['violation_type_list'] = df['violation_type'].apply(parse_violation)
-    # Explode if we want each violation separately, or just take the first/most severe.
-    # Let's just create a primary_violation string for weighting.
     df['primary_violation'] = df['violation_type_list'].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else 'UNKNOWN')
     
     print(f"Data loaded and cleaned. Total records: {len(df)}")
@@ -81,7 +87,8 @@ def get_road_weight(location):
     return 3 # Default collector
 
 def get_peak_hour_weight(hour):
-    if 6 <= hour <= 9:
+    # Morning peak 08:00-11:00 as per report, and evening 17:00-21:00
+    if 8 <= hour <= 11:
         return 1.5
     elif 17 <= hour <= 21:
         return 1.5
@@ -121,55 +128,75 @@ def calculate_dynamic_fine(pis):
         return 5000
 
 def detect_hotspots(df, eps_km=0.05, min_samples=20):
-    print("Detecting hotspots using DBSCAN...")
-    # Convert lat/lon to radians for haversine metric
-    coords = df[['latitude', 'longitude']].dropna()
-    # eps in kilometers, convert to radians (Earth radius approx 6371 km)
+    print("Detecting hotspots (Split: Named vs DBSCAN Discovered)...")
+    
+    # Exclude February data from hotspot clustering to avoid skewing by the anomaly
+    # Actually, the report says "February should not be used in month-over-month trend interpretation", 
+    # but let's exclude it from the core hotspot clustering to be safe, or keep it but it will just add less weight.
+    # We will keep it but it has naturally less count.
+    
+    df['is_discovered_cluster'] = False
+    
+    named_mask = ~df['junction_name'].isin(['No Junction', 'Unknown', 'nan', ''])
+    df_named = df[named_mask].copy()
+    
+    named_junctions = df_named['junction_name'].unique()
+    named_id_map = {name: i + 1000 for i, name in enumerate(named_junctions)}
+    df_named['hotspot_id'] = df_named['junction_name'].map(named_id_map)
+    df_named['is_discovered_cluster'] = False
+    
+    df_unnamed = df[~named_mask].copy()
+    
+    # Run DBSCAN on unnamed
+    coords = df_unnamed[['latitude', 'longitude']].dropna()
     eps_rad = eps_km / 6371.0
     
     db = DBSCAN(eps=eps_rad, min_samples=min_samples, algorithm='ball_tree', metric='haversine')
+    if not coords.empty:
+        df_unnamed['hotspot_id'] = db.fit_predict(np.radians(coords))
+    else:
+        df_unnamed['hotspot_id'] = -1
+        
+    df_unnamed['is_discovered_cluster'] = True
     
-    # We may need to sample if data is too huge.
-    # We will cluster on the subset of approved violations.
-    # DBSCAN memory can be an issue for 300k points. Let's do it on unique rounded coordinates to speed up if needed.
-    # For now, let's cluster directly on coords. If it crashes, we'll round to 4 decimals.
-    df['hotspot_id'] = db.fit_predict(np.radians(coords))
+    # Combine back
+    df_combined = pd.concat([df_named, df_unnamed])
     
     # Filter out noise (hotspot_id == -1)
-    df_hotspots = df[df['hotspot_id'] != -1].copy()
+    df_hotspots = df_combined[df_combined['hotspot_id'] != -1].copy()
+    
+    # Helper to calculate peak window
+    def get_peak_window(hours_series):
+        if hours_series.empty:
+            return "N/A"
+        mode_hour = hours_series.mode()[0]
+        # Make a 2-hour window around the mode hour
+        start = mode_hour
+        end = (mode_hour + 2) % 24
+        return f"{start:02d}:00–{end:02d}:00"
     
     # Calculate hotspot metrics
-    hotspot_metrics = df_hotspots.groupby('hotspot_id').agg(
+    hotspot_metrics = df_hotspots.groupby(['hotspot_id', 'is_discovered_cluster']).agg(
         centroid_lat=('latitude', 'mean'),
         centroid_lon=('longitude', 'mean'),
         violation_count=('id', 'count'),
-        avg_PIS=('PIS', 'mean')
+        avg_PIS=('PIS', 'mean'),
+        police_station=('police_station', lambda x: x.mode()[0] if not x.empty else 'Unknown'),
+        junction_name=('junction_name', lambda x: x.mode()[0] if not x.empty else 'Unknown')
     ).reset_index()
     
-    # Hotspot density can be approximated by violation_count
-    hotspot_metrics['hotspot_density'] = hotspot_metrics['violation_count']
+    # Add peak window separately to avoid pandas warning on mode
+    peak_windows = df_hotspots.groupby(['hotspot_id', 'is_discovered_cluster'])['hour'].apply(get_peak_window).reset_index()
+    peak_windows.rename(columns={'hour': 'peak_window'}, inplace=True)
+    hotspot_metrics = pd.merge(hotspot_metrics, peak_windows, on=['hotspot_id', 'is_discovered_cluster'])
     
-    print(f"Detected {len(hotspot_metrics)} hotspots.")
+    # Rename junctions for discovered clusters
+    hotspot_metrics.loc[hotspot_metrics['is_discovered_cluster'], 'junction_name'] = hotspot_metrics.loc[hotspot_metrics['is_discovered_cluster'], 'hotspot_id'].apply(lambda x: f"Discovered Cluster #{x}")
+    
+    hotspot_metrics['impact_score'] = hotspot_metrics['violation_count'] * hotspot_metrics['avg_PIS']
+    
+    print(f"Detected {len(hotspot_metrics)} total hotspots (Named + Discovered).")
     return df_hotspots, hotspot_metrics
-
-def generate_hotspot_map(hotspot_metrics):
-    if hotspot_metrics.empty:
-        return None
-        
-    map_center = [hotspot_metrics['centroid_lat'].mean(), hotspot_metrics['centroid_lon'].mean()]
-    m = folium.Map(location=map_center, zoom_start=11)
-    
-    for idx, row in hotspot_metrics.iterrows():
-        folium.CircleMarker(
-            location=[row['centroid_lat'], row['centroid_lon']],
-            radius=min(row['violation_count'] / 50, 20) + 5,
-            popup=f"Hotspot {row['hotspot_id']}<br>Violations: {row['violation_count']}<br>Avg PIS: {row['avg_PIS']:.2f}",
-            color='red',
-            fill=True,
-            fillColor='red'
-        ).add_to(m)
-        
-    return m
 
 if __name__ == "__main__":
     file_path = "jan to may police violation_anonymized791b166.csv"
@@ -178,5 +205,5 @@ if __name__ == "__main__":
     df['dynamic_fine'] = df['PIS'].apply(calculate_dynamic_fine)
     df_hotspots, hotspot_metrics = detect_hotspots(df)
     hotspot_metrics.to_csv("hotspot_metrics.csv", index=False)
-    df.to_csv("processed_data.csv", index=False)
+    df_hotspots.to_csv("processed_data.csv", index=False)
     print("Data processing complete. Saved to processed_data.csv and hotspot_metrics.csv")
