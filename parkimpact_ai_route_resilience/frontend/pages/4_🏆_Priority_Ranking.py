@@ -4,6 +4,9 @@ import streamlit as st
 from frontend.utils.ui_helpers import create_kpi_card, create_themed_bar_chart, create_parking_heatmap, create_animated_graph, create_realtime_animator, create_action_plan_card
 
 import pandas as pd
+import importlib
+import backend.services.graph_criticality
+importlib.reload(backend.services.graph_criticality)
 from backend.services.graph_criticality import GraphCriticality
 st.title("🏆 Priority Ranking Engine")
 st.markdown("<p style='color:#94a3b8;'>Rank hotspots based on Graph-Theoretic Criticality and road network resilience.</p>", unsafe_allow_html=True)
