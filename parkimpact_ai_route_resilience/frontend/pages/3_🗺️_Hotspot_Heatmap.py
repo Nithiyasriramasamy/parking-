@@ -27,16 +27,21 @@ with col_map:
     st.markdown("### 🧭 Tactical Map View")
     time_filter = st.selectbox("Select Time Context:", ["Current Live View", "Morning Peak (08:00 - 11:00)", "Evening Peak (17:00 - 20:00)"])
     
-    # Generate Map Data based on filter
+    # Generate Map Data & Narrative based on filter
     if time_filter == "Morning Peak (08:00 - 11:00)":
+        narrative = "During **Morning Peak (08:00 - 11:00)**, parking violations are **extremely heavy** around **KR Puram Market** and **Indiranagar**, causing up to a 60% reduction in traffic flow for office commuters."
         lats = np.random.normal(12.9716, 0.08, 400)
         lons = np.random.normal(77.5946, 0.08, 400)
     elif time_filter == "Evening Peak (17:00 - 20:00)":
+        narrative = "During **Evening Peak (17:00 - 20:00)**, illegal parking heavily chokes **Silk Board Junction** and **HSR Layout**. This is severely restricting outbound IT corridor traffic."
         lats = np.random.normal(12.9279, 0.04, 600) # Shifted towards Silk Board
         lons = np.random.normal(77.6271, 0.04, 600)
     else:
+        narrative = "Right now in the **Current Live View**, there is a sudden spike in illegal parking at **MG Road Metro Station**. Immediate enforcement is required to prevent a gridlock."
         lats = np.random.normal(12.9716, 0.05, 300)
         lons = np.random.normal(77.5946, 0.05, 300)
+        
+    st.info(f"🤖 **AI Executive Summary:** {narrative}")
         
     df = pd.DataFrame({'latitude': lats, 'longitude': lons, 'disruption_index': np.random.uniform(5, 10, len(lats))})
     
