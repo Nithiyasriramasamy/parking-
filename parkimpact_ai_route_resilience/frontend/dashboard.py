@@ -11,8 +11,28 @@ st.set_page_config(page_title="ASTA1 Command Center", page_icon="🚗", layout="
 # Load global CSS
 load_css()
 
+def go_prev(page_keys, current_selection):
+    idx = page_keys.index(current_selection)
+    if idx > 0:
+        st.session_state.nav_radio = page_keys[idx - 1]
+
+def go_next(page_keys, current_selection):
+    idx = page_keys.index(current_selection)
+    if idx < len(page_keys) - 1:
+        st.session_state.nav_radio = page_keys[idx + 1]
+
+def render_navigation(page_keys, selection, position="top"):
+    current_idx = page_keys.index(selection)
+    col1, col2, col3 = st.columns([1, 6, 1])
+    with col1:
+        if current_idx > 0:
+            st.button("⬅️ Previous", key=f"prev_{position}", on_click=go_prev, args=(page_keys, selection), use_container_width=True)
+    with col3:
+        if current_idx < len(page_keys) - 1:
+            st.button("Next ➡️", key=f"next_{position}", on_click=go_next, args=(page_keys, selection), use_container_width=True)
+
 def create_sidebar():
-    st.sidebar.markdown("<h2 style='text-align: center; color: #6366F1;'>🚗 ASTA1<br><span style='font-size:14px; color:#9CA3AF;'>AI Traffic Impact Intelligence</span></h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("<h2 style='text-align: center; color: #38BDF8; text-shadow: 0 0 10px rgba(56,189,248,0.5);'>🚗 ASTA1<br><span style='font-size:14px; color:#9CA3AF; text-shadow:none;'>AI Traffic Impact Intelligence</span></h2>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
     pages = {
@@ -31,21 +51,34 @@ def create_sidebar():
         "Auto Alert": "13_📱_Auto_Alert.py"
     }
     
-    selection = st.sidebar.radio("Command Center Modules", list(pages.keys()))
+    page_keys = list(pages.keys())
+    
+    if "nav_radio" not in st.session_state:
+        st.session_state.nav_radio = page_keys[0]
+        
+    selection = st.sidebar.radio("Command Center Modules", page_keys, key="nav_radio")
     
     st.sidebar.markdown("---")
-    st.sidebar.markdown("<div style='text-align:center; color:#10b981; font-weight:bold;'>System Status: Active 🟢</div>", unsafe_allow_html=True)
+    st.sidebar.markdown("<div style='text-align:center; color:#34D399; font-weight:bold; text-shadow: 0 0 5px rgba(52,211,153,0.5);'>System Status: Active 🟢</div>", unsafe_allow_html=True)
     
-    return pages[selection]
+    return selection, pages, page_keys
 
 # Main routing logic
-selected_page_file = create_sidebar()
+selection, pages, page_keys = create_sidebar()
+selected_page_file = pages[selection]
 
 # Construct the path to the selected page
 page_path = os.path.join(os.path.dirname(__file__), "pages", selected_page_file)
+
+# Top Navigation
+render_navigation(page_keys, selection, "top")
 
 # Execute the selected page
 if os.path.exists(page_path):
     runpy.run_path(page_path)
 else:
     st.error(f"Module {selected_page_file} is currently under construction or missing.")
+
+# Bottom Navigation
+st.markdown("<br><hr style='border-color: rgba(56, 189, 248, 0.2);'>", unsafe_allow_html=True)
+render_navigation(page_keys, selection, "bottom")

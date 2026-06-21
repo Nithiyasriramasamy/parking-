@@ -279,8 +279,6 @@ with c_left:
                 req = AlertRequest(vehicle_plate=plate, owner_phone=phone, location=location)
                 res = dispatch_auto_alert(req)
                 st.success("Alert Dispatched Successfully!")
-                time.sleep(0.5)
-                st.rerun() # Refresh to trigger JS
             except Exception as e:
                 st.error(f"Error: {e}")
 

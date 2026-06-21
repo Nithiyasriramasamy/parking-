@@ -56,7 +56,7 @@ def create_parking_heatmap(violations_df, lat_col='latitude', lon_col='longitude
         radius=15,
         center=dict(lat=12.9716, lon=77.5946), # Bangalore center
         zoom=10,
-        mapbox_style="dark",
+        mapbox_style="carto-darkmatter",
         color_continuous_scale="reds"
     )
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, paper_bgcolor='rgba(0,0,0,0)')
