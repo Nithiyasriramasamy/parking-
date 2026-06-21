@@ -10,13 +10,23 @@ class GraphCriticality:
         self.nodes_count = 125
         self.edges_count = 200
         
+        self.bengaluru_locations = [
+            "Silk Board Junction", "MG Road Metro", "KR Puram Market", "Indiranagar 100ft Rd", 
+            "Koramangala 80ft Rd", "Marathahalli Bridge", "Hebbal Flyover", "Majestic Bus Stand", 
+            "Whitefield Main Rd", "Electronic City Phase 1", "Bellandur ORR", "Domlur Flyover"
+        ]
+        self.risk_labels = [
+            "Arterial Chokepoint", "No Alternate Routes", "High Commuter Volume",
+            "Emergency Route Blockage", "Bus Lane Obstruction"
+        ]
+        
     def get_graph_data(self):
         # Generate mock nodes
         nodes = []
         lats = [12.9716 + random.uniform(-0.05, 0.05) for _ in range(self.nodes_count)]
         lons = [77.5946 + random.uniform(-0.05, 0.05) for _ in range(self.nodes_count)]
         for i in range(self.nodes_count):
-            nodes.append({"id": f"N{i}", "name": f"Junction {i}", "lat": lats[i], "lon": lons[i]})
+            nodes.append({"id": f"N{i}", "name": random.choice(self.bengaluru_locations), "lat": lats[i], "lon": lons[i]})
             
         # Generate mock edges
         edges = []
@@ -24,8 +34,15 @@ class GraphCriticality:
             n1 = random.randint(0, self.nodes_count - 1)
             n2 = random.randint(0, self.nodes_count - 1)
             b_score = random.uniform(0.1, 0.9)
+            
+            # For the top edges, let's force high scores
+            if i < 15:
+                b_score = random.uniform(0.75, 0.95)
+                
             edges.append({
                 "id": f"E{i}", 
+                "location_name": random.choice(self.bengaluru_locations),
+                "primary_risk": random.choice(self.risk_labels),
                 "start_node": f"N{n1}", 
                 "end_node": f"N{n2}",
                 "start_lat": lats[n1], "start_lon": lons[n1],
