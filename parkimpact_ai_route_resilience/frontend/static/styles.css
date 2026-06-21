@@ -1,0 +1,118 @@
+/* ASTA1 Cyber-Glassmorphism Theme */
+
+/* General Backgrounds */
+.stApp {
+    background: linear-gradient(180deg, #0B0F19 0%, #111827 100%) !important;
+    color: #F8FAFC !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: rgba(17, 24, 39, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-right: 1px solid rgba(56, 189, 248, 0.2) !important;
+}
+
+/* Hide Streamlit default page navigation in sidebar */
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
+/* Base Streamlit overrides */
+h1, h2, h3, h4, h5, h6, p, span, div {
+    color: #F8FAFC;
+}
+
+h1 {
+    color: #38BDF8 !important;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+/* Cyber KPI Cards */
+.kpi-card {
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.7) 0%, rgba(17, 24, 39, 0.9) 100%);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    text-align: center;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    margin-bottom: 12px;
+    transition: all 0.3s ease-in-out;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.kpi-title {
+    color: #94A3B8;
+    font-size: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.kpi-value {
+    color: #38BDF8;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 0px;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.kpi-icon {
+    font-size: 36px;
+    margin-bottom: 15px;
+    filter: drop-shadow(0px 0px 8px rgba(255,255,255,0.2));
+}
+
+/* Action Plan Cards */
+.action-plan-card {
+    background: rgba(31, 41, 55, 0.6);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+}
+
+.action-plan-card:hover {
+    background: rgba(31, 41, 55, 0.9);
+}
+
+/* Buttons */
+.stButton > button {
+    background: linear-gradient(90deg, #38BDF8 0%, #3B82F6 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4) !important;
+    transition: all 0.3s ease !important;
+}
+
+.stButton > button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.6) !important;
+}
+
+/* DataFrames / Tables */
+[data-testid="stDataFrame"] {
+    background-color: #111827 !important;
+    border: 1px solid rgba(56, 189, 248, 0.2) !important;
+    border-radius: 8px !important;
+}
+
+/* Hide MainMenu and Footer */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}

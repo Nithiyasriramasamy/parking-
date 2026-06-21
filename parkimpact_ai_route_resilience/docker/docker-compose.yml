@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: asta1_frontend
+    command: streamlit run frontend/dashboard.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../frontend:/app/frontend
+      - ../data:/app/data
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: asta1_backend
+    command: uvicorn backend.app:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../backend:/app/backend
+      - ../data:/app/data
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: asta1_redis
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: asta1_celery
+    command: celery -A backend.celery_app worker --loglevel=info
+    volumes:
+      - ../backend:/app/backend
+      - ../data:/app/data
+    depends_on:
+      - redis
