@@ -32,7 +32,7 @@ def render_navigation(page_keys, selection, position="top"):
             st.button("Next ➡️", key=f"next_{position}", on_click=go_next, args=(page_keys, selection), use_container_width=True)
 
 def create_sidebar():
-    st.sidebar.markdown("<h2 style='text-align: center; color: #38BDF8; text-shadow: 0 0 10px rgba(56,189,248,0.5);'>🚗 ASTA1<br><span style='font-size:14px; color:#9CA3AF; text-shadow:none;'>AI Traffic Impact Intelligence</span></h2>", unsafe_allow_html=True)
+    st.sidebar.markdown("<a href='/' target='_self' style='text-decoration:none;'><h2 style='text-align: center; color: #38BDF8; text-shadow: 0 0 10px rgba(56,189,248,0.5);'>🚗 ASTA1<br><span style='font-size:14px; color:#9CA3AF; text-shadow:none;'>AI Traffic Impact Intelligence</span></h2></a>", unsafe_allow_html=True)
     st.sidebar.markdown("---")
     
     pages = {

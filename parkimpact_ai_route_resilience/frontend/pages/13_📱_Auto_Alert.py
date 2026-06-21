@@ -284,6 +284,8 @@ with c_left:
 
 with c_right:
     st.markdown("### ⏳ Active Countdowns & Logs")
+    if st.button("🔄 Refresh Logs", use_container_width=True):
+        st.rerun()
     
     # Render active alerts into a table
     if not active_alerts:
