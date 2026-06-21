@@ -2,8 +2,18 @@
 
 /* General Backgrounds */
 .stApp {
-    background: linear-gradient(180deg, #0B0F19 0%, #111827 100%) !important;
+    background-color: #0B0F19 !important;
+    background-image: 
+        linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px) !important;
+    background-size: 30px 30px !important;
+    animation: grid-scroll 20s linear infinite !important;
     color: #F8FAFC !important;
+}
+
+@keyframes grid-scroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 30px 30px; }
 }
 
 /* Sidebar */

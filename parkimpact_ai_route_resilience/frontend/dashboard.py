@@ -21,13 +21,14 @@ def create_sidebar():
         "Hotspot Heatmap": "3_🗺️_Hotspot_Heatmap.py",
         "Priority Ranking": "4_🏆_Priority_Ranking.py",
         "What-If Simulator": "5_⚙️_What-If_Simulator.py",
-        "Resource Planner": "6_🚓_Resource_Planner.py",
+        "Resource Planner": "6_📋_Resource_Planner.py",
         "Predictive Insights": "7_🔮_Predictive_Insights.py",
         "Explainable AI": "8_🧠_Explainable_AI.py",
         "Reports": "9_📄_Reports.py",
         "Occlusion Robustness": "10_🌳_Occlusion_Robustness.py",
         "Dynamic Fines": "11_💰_Dynamic_Fines.py",
-        "Real-Time Integration": "12_🔴_Real-Time_Integration.py"
+        "Real-Time Integration": "12_🔴_Real-Time_Integration.py",
+        "Auto Alert": "13_📱_Auto_Alert.py"
     }
     
     selection = st.sidebar.radio("Command Center Modules", list(pages.keys()))
