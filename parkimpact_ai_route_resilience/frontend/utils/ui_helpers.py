@@ -4,8 +4,13 @@ import plotly.express as px
 import time
 
 def load_css():
-    with open("frontend/static/styles.css", "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    import os
+    css_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "styles.css")
+    try:
+        with open(css_path, "r") as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except Exception as e:
+        pass
 
 def create_kpi_card(title, value, unit="", icon="📊", color="#38BDF8"):
     """Creates a stylized KPI card."""

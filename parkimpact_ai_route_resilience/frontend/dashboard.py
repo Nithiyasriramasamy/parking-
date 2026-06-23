@@ -68,7 +68,7 @@ selection, pages, page_keys = create_sidebar()
 selected_page_file = pages[selection]
 
 # Construct the path to the selected page
-page_path = os.path.join(os.path.dirname(__file__), "pages", selected_page_file)
+page_path = os.path.join(os.path.dirname(__file__), "views", selected_page_file)
 
 # Top Navigation
 render_navigation(page_keys, selection, "top")
