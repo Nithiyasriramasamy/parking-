@@ -8,3 +8,4 @@ streamlit-folium
 plotly
 streamlit
 geopandas
+fastapi
