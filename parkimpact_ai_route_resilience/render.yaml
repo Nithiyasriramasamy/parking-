@@ -2,6 +2,7 @@ services:
   - type: web
     name: asta1-frontend
     env: python
+    rootDir: parkimpact_ai_route_resilience
     buildCommand: "pip install -r requirements.txt"
     startCommand: "streamlit run frontend/dashboard.py --server.port $PORT"
     envVars:
@@ -11,6 +12,7 @@ services:
   - type: web
     name: asta1-backend
     env: python
+    rootDir: parkimpact_ai_route_resilience
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn backend.app:app --host 0.0.0.0 --port $PORT"
     envVars:
