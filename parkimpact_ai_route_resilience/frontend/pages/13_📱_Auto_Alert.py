@@ -7,8 +7,7 @@ import time
 import random
 import streamlit.components.v1 as components
 from frontend.utils.ui_helpers import create_kpi_card, create_action_plan_card
-import requests
-API_URL = os.environ.get("BACKEND_URL", "https://parking-h8qb.onrender.com")
+from backend.api.alert_owner import active_alerts, dispatch_auto_alert, AlertRequest
 
 st.title("📱 Auto Alert & Owner Notification")
 st.markdown("<p style='color:#94a3b8;'>Real-time automated SMS and Voice call dispatch to violators with 10-minute countdowns.</p>", unsafe_allow_html=True)
@@ -277,10 +276,8 @@ with c_left:
         if submitted:
             st.session_state.trigger_anim = True
             try:
-                payload = {"vehicle_plate": plate, "owner_phone": phone, "location": location}
-                response = requests.post(f"{API_URL}/api/alert-owner", json=payload)
-                response.raise_for_status()
-                res = response.json()
+                req = AlertRequest(vehicle_plate=plate, owner_phone=phone, location=location)
+                res = dispatch_auto_alert(req)
                 st.success("Alert Dispatched Successfully!")
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -291,13 +288,7 @@ with c_right:
         st.rerun()
     
     # Render active alerts into a table
-    # Fetch active alerts from remote backend
-    try:
-        resp = requests.get(f"{API_URL}/api/active-alerts")
-        active_alerts = resp.json() if resp.status_code == 200 else {}
-    except:
-        active_alerts = {}
-        
+
     if not active_alerts:
         st.info("No active alerts.")
     else:
@@ -312,7 +303,7 @@ with c_right:
                 "Vehicle": data['vehicle_plate'],
                 "Location": data['location'],
                 "Status": f"{status_color} {data['status']}",
-                "Deadline": data['deadline'].split("T")[1][:8] if "T" in data['deadline'] else data['deadline']
+                "Deadline": data['deadline'].split("T")[1][:8]
             })
             
         df = pd.DataFrame(log_data)
