@@ -1,0 +1,12 @@
+pandas
+numpy
+scikit-learn
+lightgbm
+xgboost
+folium
+streamlit-folium
+plotly
+streamlit
+geopandas
+fastapi
+requests
