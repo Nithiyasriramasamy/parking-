@@ -8,6 +8,10 @@ app = FastAPI(title="ASTA1 Backend API", description="Enterprise Route Resilienc
 
 app.include_router(alert_router, prefix="/api", tags=["owner-alerts"])
 
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "ASTA1 Backend API is running successfully!"}
+
 # Data Models
 class PredictRequest(BaseModel):
     hour: int
