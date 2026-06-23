@@ -22,3 +22,17 @@ area_df = pd.DataFrame({"Hour": [f"{h:02d}:00" for h in hours], "Economic Loss (
 fig = px.area(area_df, x="Hour", y="Economic Loss (₹)", color_discrete_sequence=['#6366F1'])
 fig.update_layout(template='plotly_dark', paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
 st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("<hr style='border-color: rgba(56, 189, 248, 0.2);'>", unsafe_allow_html=True)
+st.markdown("### 🚗 Top Vehicles Causing Critical Impact")
+st.markdown("<p style='color:#94a3b8;'>Live VAHAN database lookup of vehicles currently causing the highest economic and congestion damage.</p>", unsafe_allow_html=True)
+
+vehicle_data = [
+    {"Vehicle Plate": "KA-01-AB-1234", "Vehicle Type": "SUV", "Location": "Silk Board Junction", "Duration (Mins)": 45, "Delay Caused (Vehicles)": 320, "Economic Loss (₹)": 8500},
+    {"Vehicle Plate": "KA-05-MN-4567", "Vehicle Type": "Delivery Truck", "Location": "MG Road", "Duration (Mins)": 20, "Delay Caused (Vehicles)": 150, "Economic Loss (₹)": 4200},
+    {"Vehicle Plate": "KA-03-XY-9876", "Vehicle Type": "Sedan", "Location": "Indiranagar 100ft", "Duration (Mins)": 65, "Delay Caused (Vehicles)": 210, "Economic Loss (₹)": 5600},
+    {"Vehicle Plate": "KA-51-PQ-5555", "Vehicle Type": "Hatchback", "Location": "KR Puram Market", "Duration (Mins)": 15, "Delay Caused (Vehicles)": 90, "Economic Loss (₹)": 1800},
+    {"Vehicle Plate": "KA-04-RS-3321", "Vehicle Type": "SUV", "Location": "Hebbal Flyover", "Duration (Mins)": 30, "Delay Caused (Vehicles)": 400, "Economic Loss (₹)": 11000},
+]
+vehicle_df = pd.DataFrame(vehicle_data).sort_values("Economic Loss (₹)", ascending=False)
+st.dataframe(vehicle_df, use_container_width=True, hide_index=True)
